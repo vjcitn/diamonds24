@@ -13,7 +13,8 @@ Description: Learning about shiny at CSAMA 2024.
 License: Artistic-2.0
 Encoding: UTF-8
 Depends: R (>= 4.1), shiny, celldex
-Imports: SingleR, scRNAseq, scater, scuttle, BiocParallel
+Imports: SingleR, scRNAseq, scater, scuttle, 
+	BiocParallel, shinytoastr
 Suggests: knitr, testthat, BiocStyle
 VignetteBuilder: knitr
 biocViews: Infrastructure
