@@ -22,36 +22,62 @@ scapp = function() {
   sidebarLayout(
    sidebarPanel(
     helpText("app for labeling single cells with selected references"),
-    radioButtons("ref", "refs", optfuns),
+    radioButtons("ref", "refs", optfuns, selected="HumanPrimaryCellAtlasData"),
 # consider option for label.main, label.fine
     numericInput("ncomp", "npcs", min=2, max=5, value=2),
     helpText("provide an upload function here"), width=2
     ),
     mainPanel(
-     plotOutput("view")
+     tabsetPanel(
+      tabPanel("main", plotOutput("view")),
+      tabPanel("interact", plotly::plotlyOutput("viewly")),
+      tabPanel("author", plotOutput("auth")),
+      tabPanel("ref comp", verbatimTextOutput("called"))
+     )
     )
    )
   )
  server = function(input, output) {
   # needs help here -- 1) use upload method, 2) verify gene symbols present, get from rowData if not
-  build_sce = reactive({
+  # setup, runPCA once, defines "given"
    given = scRNAseq::MuraroPancreasData() 
    rownames(given) = rowData(given)$symbol
    dups = which(duplicated(rownames(given)))
    if (length(dups)>0) given = given[-dups,]
    given = scuttle::logNormCounts(given)
+   given = scater::runPCA(given)
+  #
+  run_SingleR = reactive({
    ref2use = get(input$ref)()
    myb = BiocParallel::MulticoreParam(4)
    shinytoastr::toastr_info("starting SingleR")
    sing = SingleR::SingleR(given, ref2use, ref2use$label.main, BPPARAM=myb)
    shinytoastr::toastr_info("done")
    given$celltype = sing$labels
-   scater::runPCA(given)
+   #scater::runPCA(given)
+   given
    })
   output$view = renderPlot({
-   given = build_sce()
+   given = run_SingleR()
    scater::plotPCA(given, colour_by = "celltype", 
         ncomponents=input$ncomp, theme_size=14)
+   })
+  output$viewly = plotly::renderPlotly({
+   given = run_SingleR()
+   dfr = SingleCellExperiment::reducedDim(given)
+   mydf = data.frame(PC1 = dfr[,1], PC2=dfr[,2], type=given$celltype)
+   gg = ggplot2::ggplot(mydf, aes(x=PC1, y=PC2, text=type,
+      colour=type)) +
+     ggplot2::geom_point()
+   plotly::ggplotly(gg)
+   })
+  output$auth = renderPlot({
+   scater::plotPCA(given, colour_by = "label",
+        ncomponents=input$ncomp, theme_size=14)
+   })
+  output$called = renderPrint({
+   given = run_SingleR()
+   sort(table(given$celltype))
    })
  }
  runApp(list(ui=ui, server=server))
