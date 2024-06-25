@@ -76,8 +76,8 @@ scapp = function() {
         ncomponents=input$ncomp, theme_size=14)
    })
   output$called = renderPrint({
-   given = run_SingleR()
-   sort(table(given$celltype))
+   ref2use = get(input$ref)()
+   sort(table(ref2use$label.main))
    })
  }
  runApp(list(ui=ui, server=server))
