@@ -22,6 +22,7 @@ scapp = function() {
   sidebarLayout(
    sidebarPanel(
     helpText("app for labeling single cells with selected references"),
+    helpText(sprintf("version %s", packageVersion("diamonds24"))),
     radioButtons("ref", "refs", optfuns, selected="HumanPrimaryCellAtlasData"),
 # consider option for label.main, label.fine
     numericInput("ncomp", "npcs", min=2, max=5, value=2),
@@ -32,7 +33,8 @@ scapp = function() {
       tabPanel("main", plotOutput("view")),
       tabPanel("interact", plotly::plotlyOutput("viewly")),
       tabPanel("author", plotOutput("auth")),
-      tabPanel("ref comp", verbatimTextOutput("called"))
+      tabPanel("ref comp", verbatimTextOutput("called")),
+      tabPanel("ref comp2", verbatimTextOutput("called2"))
      )
     )
    )
@@ -78,6 +80,10 @@ scapp = function() {
   output$called = renderPrint({
    ref2use = get(input$ref)()
    sort(table(ref2use$label.main))
+   })
+  output$called2 = renderPrint({
+   ref2use = get(input$ref)()
+   sort(table(ref2use$label.fine))
    })
  }
  runApp(list(ui=ui, server=server))
