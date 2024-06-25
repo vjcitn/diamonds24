@@ -18,14 +18,14 @@ scapp = function() {
 "HumanPrimaryCellAtlasData", "ImmGenData", "MonacoImmuneData", 
 "MouseRNAseqData", "NovershternHematopoieticData")
  ui = fluidPage(
-  useToastr(),
+  shinytoastr::useToastr(),
   sidebarLayout(
    sidebarPanel(
     helpText("app for labeling single cells with selected references"),
     radioButtons("ref", "refs", optfuns),
 # consider option for label.main, label.fine
     numericInput("ncomp", "npcs", min=2, max=5, value=2),
-    helpText("provide an upload function here")
+    helpText("provide an upload function here"), width=2
     ),
     mainPanel(
      plotOutput("view")
@@ -42,15 +42,16 @@ scapp = function() {
    given = scuttle::logNormCounts(given)
    ref2use = get(input$ref)()
    myb = BiocParallel::MulticoreParam(4)
-   toastr_info("starting SingleR")
+   shinytoastr::toastr_info("starting SingleR")
    sing = SingleR::SingleR(given, ref2use, ref2use$label.main, BPPARAM=myb)
-   toastr_info("done")
+   shinytoastr::toastr_info("done")
    given$celltype = sing$labels
    scater::runPCA(given)
    })
   output$view = renderPlot({
    given = build_sce()
-   scater::plotPCA(given, colour_by = "celltype", ncomponents=input$ncomp)
+   scater::plotPCA(given, colour_by = "celltype", 
+        ncomponents=input$ncomp, theme_size=14)
    })
  }
  runApp(list(ui=ui, server=server))
