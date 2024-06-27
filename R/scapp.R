@@ -14,9 +14,9 @@
 #' @export
 scapp = function() {
 # derived from ls("package:celldex")
- optfuns = c("BlueprintEncodeData", "DatabaseImmuneCellExpressionData", 
-"HumanPrimaryCellAtlasData", "ImmGenData", "MonacoImmuneData", 
-"MouseRNAseqData", "NovershternHematopoieticData")
+ optfuns = c(ENCOblue="BlueprintEncodeData", DICE="DatabaseImmuneCellExpressionData", 
+HPCA="HumanPrimaryCellAtlasData", ImmGen="ImmGenData", Monaco="MonacoImmuneData", 
+mouse="MouseRNAseqData", hematopo="NovershternHematopoieticData")
  ui = fluidPage(
   shinytoastr::useToastr(),
   sidebarLayout(
